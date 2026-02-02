@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>Content Analyzer - Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f35 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            padding: 20px 15px 15px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .section {
+            background: var(--bg-light);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #60a5fa;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-copy {
+            background: var(--accent);
+            color: white;
+            font-size: 0.9rem;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .preview-img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #1e293b, rgba(99, 102, 241, 0.05));
+            border: 2px solid #334155;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .card-content {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .prompt-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+            max-width: 90%;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 100px);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-icon">🎬</div>
+            <h1>Content Analyzer</h1>
+            <p class="tagline">Analisis Konten 30 Detik</p>
+        </header>
+
+        <div class="content-wrapper">
+            <section class="section">
+                <div class="section-title">📎 Paste URL</div>
+                
+                <input 
+                    type="text" 
+                    id="urlInput" 
+                    placeholder="Paste link gambar atau video" 
+                    autocomplete="off"
+                >
+
+                <textarea 
+                    id="notesInput" 
+                    placeholder="Catatan (opsional)&#10;Contoh: Saya ingin gaya lebih minimalis"
+                ></textarea>
+
+                <button class="btn btn-primary" onclick="analyzeContent()">
+                    🔍 ANALISIS
+                </button>
+
+                <div class="info-box">
+                    💡 URL: Instagram, TikTok, YouTube, Unsplash, Pexels, atau direct link
+                </div>
+            </section>
+
+            <section class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Menganalisis... Tunggu 30-60 detik</p>
+            </section>
+
+            <section class="results" id="resultsSection">
+                <div class="result-card">
+                    <div class="card-title">📸 Deskripsi</div>
+                    <div class="card-content" id="descResult"></div>
+                </div>
+
+                <div class="result-card">
+                    <div class="card-title">🎨 Visual Elements</div>
+                    <div class="card-content" id="visualResult"></div>
+                </div>
+
+                <div class="result-card">
+                    <div class="card-title">💡 Teknik & Gaya</div>
+                    <div class="card-content" id="techniqueResult"></div>
+                </div>
+
+                <div class="result-card">
+                    <div class="card-title">🎯 Prompt Siap Pakai</div>
+                    <div class="prompt-box" id="promptResult"></div>
+                    <button class="btn btn-copy" onclick="copyPrompt()">📋 Copy Prompt</button>
+                </div>
+
+                <div class="result-card">
+                    <div class="card-title">📝 Script/Naskah</div>
+                    <div class="card-content" id="scriptResult"></div>
+                </div>
+
+                <div class="result-card">
+                    <div class="card-title">🎬 Strategi Reproduksi</div>
+                    <div class="card-content" id="strategyResult"></div>
+                </div>
+
+                <div style="height: 30px;"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // ===== API KEY - SUDAH DIKONFIGURASI =====
+        const API_KEY = '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';
+        let currentPrompt = '';
+
+        async function analyzeContent() {
+            const url = document.getElementById('urlInput').value.trim();
+            const notes = document.getElementById('notesInput').value.trim();
+
+            if (!url) {
+                showError('❌ Silakan masukkan URL gambar atau video terlebih dahulu');
+                return;
+            }
+
+            if (!API_KEY || API_KEY === 'YOUR_ANTHROPIC_API_KEY') {
+                showError('⚠️ API Key belum dikonfigurasi. Silakan set API_KEY Anda di kode.');
+                return;
+            }
+
+            document.getElementById('loadingSection').classList.add('show');
+            document.getElementById('resultsSection').classList.remove('show');
+
+            try {
+                const result = await analyzeWithClaude(url, notes);
+                displayResults(result);
+                document.getElementById('loadingSection').classList.remove('show');
+                document.getElementById('resultsSection').classList.add('show');
+                
+                setTimeout(() => {
+                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            } catch (error) {
+                document.getElementById('loadingSection').classList.remove('show');
+                showError('❌ ' + error.message);
+            }
+        }
+
+        async function analyzeWithClaude(url, notes) {
+            const prompt = `Analisis konten dari URL ini: ${url}
+${notes ? `\nCatatan user: ${notes}` : ''}
+
+Berikan hasil analisis SINGKAT dalam Bahasa Indonesia dengan format:
+
+📸 DESKRIPSI: [Apa yang ada, mood, gaya, konteks]
+
+🎨 VISUAL: [Warna dominan, lighting, komposisi, style]
+
+💡 TEKNIK: [Fotografi style, equipment, effects yang digunakan]
+
+🎯 PROMPT: [Prompt Bahasa Indonesia untuk ChatGPT/Gemini AI - DETAILED dan ACTIONABLE]
+
+📝 SCRIPT: [Script/narasi jika ada, atau "-" jika tidak ada]
+
+🎬 STRATEGI: [Cara buat serupa, equipment needed, tips praktis untuk reproduce]
+
+JAWAB SINGKAT DAN PADAT. FOKUS PADA ACTIONABLE INSIGHTS.`;
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': API_KEY,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-opus-4-5-20251101',
+                    max_tokens: 1500,
+                    messages: [{
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: prompt
+                            },
+                            {
+                                type: 'image',
+                                source: {
+                                    type: 'url',
+                                    url: url
+                                }
+                            }
+                        ]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API Error: ' + response.statusText);
+            }
+
+            const data = await response.json();
+            return parseResults(data.content[0].text);
+        }
+
+        function parseResults(text) {
+            const sections = {
+                desc: extractSection(text, 'DESKRIPSI'),
+                visual: extractSection(text, 'VISUAL'),
+                technique: extractSection(text, 'TEKNIK'),
+                prompt: extractSection(text, 'PROMPT'),
+                script: extractSection(text, 'SCRIPT'),
+                strategy: extractSection(text, 'STRATEGI')
+            };
+            return sections;
+        }
+
+        function extractSection(text, label) {
+            const regex = new RegExp(`${label}[:\\s]+([\\s\\S]*?)(?=(?:📸|🎨|💡|🎯|📝|🎬)|$)`, 'i');
+            const match = text.match(regex);
+            return match ? match[1].trim() : 'Tidak tersedia';
+        }
+
+        function displayResults(results) {
+            document.getElementById('descResult').textContent = results.desc;
+            document.getElementById('visualResult').textContent = results.visual;
+            document.getElementById('techniqueResult').textContent = results.technique;
+            document.getElementById('scriptResult').textContent = results.script;
+            document.getElementById('strategyResult').textContent = results.strategy;
+            
+            currentPrompt = results.prompt;
+            document.getElementById('promptResult').textContent = results.prompt;
+        }
+
+        function copyPrompt() {
+            if (!currentPrompt) {
+                showError('Tidak ada prompt untuk dicopy');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentPrompt).then(() => {
+                showSuccess('✓ Prompt dicopy ke clipboard!');
+            }).catch(() => {
+                showError('Gagal copy, coba manual select & copy');
+            });
+        }
+
+        function showError(msg) {
+            const error = document.createElement('div');
+            error.className = 'error';
+            error.textContent = msg;
+            document.querySelector('.content-wrapper').insertBefore(error, document.querySelector('.content-wrapper').firstChild);
+            setTimeout(() => error.remove(), 5000);
+        }
+
+        function showSuccess(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') analyzeContent();
+        });
+    </script>
+</body>
+</html>
